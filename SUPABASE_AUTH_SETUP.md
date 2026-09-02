@@ -19,8 +19,7 @@ create table admin_users (
 1. Supabase 대시보드 → **Authentication** → **Providers**
 2. **Google** 검색 → **Enable** 클릭
 3. Google OAuth 2.0 클라이언트 ID/보안 암호 입력
-   - 클라이언트 ID: `1065487579327-vn4ig67b6kv9db0ltvqcs2niv22nrbhf.apps.googleusercontent.com`
-   - 클라이언트 보안 암호: `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`
+   - Google Cloud Console에서 생성한 클라이언트 ID/보안 암호 복사
 
 ### 2-2. Google Cloud Console에서 승인된 리디렉션 URI 추가
 1. Google Cloud Console → OAuth 2.0 클라이언트 ID

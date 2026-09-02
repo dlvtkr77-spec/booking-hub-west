@@ -18,7 +18,7 @@ https://console.cloud.google.com/
 1. 좌측 메뉴 → **API 및 서비스**
 2. **사용자 인증 정보** 클릭
 3. **OAuth 2.0 클라이언트 ID** 섹션에서 클라이언트 ID 클릭
-   - 클라이언트 ID: `1065487579327-vn4ig67b6kv9db0ltvqcs2niv22nrbhf.apps.googleusercontent.com`
+   - 생성한 클라이언트 ID 선택
 
 ### 3단계: 승인된 리디렉션 URI 추가
 1. **승인된 리디렉션 URI** 섹션 찾기
@@ -90,15 +90,9 @@ npm run dev
 
 Supabase에서 Google 제공자를 활성화할 때:
 
-1. **클라이언트 ID**: 
-   ```
-   1065487579327-vn4ig67b6kv9db0ltvqcs2niv22nrbhf.apps.googleusercontent.com
-   ```
+1. **클라이언트 ID**: Google Cloud Console에서 복사한 클라이언트 ID 입력
 
-2. **클라이언트 보안 암호**: 
-   ```
-   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
-   ```
+2. **클라이언트 보안 암호**: Google Cloud Console에서 복사한 보안 암호 입력
 
 3. **Redirect URL** (읽기 전용):
    ```
