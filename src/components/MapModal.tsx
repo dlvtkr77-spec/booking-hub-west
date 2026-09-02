@@ -107,13 +107,15 @@ export default function MapModal({ address, onClose }: MapModalProps) {
 
   if (error) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
-          <h2 className="text-xl font-bold text-red-600 mb-4">오류</h2>
-          <p className="text-gray-700 mb-4">{error}</p>
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl border border-red-400/50 p-6 max-w-sm w-full shadow-2xl">
+          <h2 className="text-xl font-bold text-red-400 mb-4 flex items-center gap-2">
+            <span>⚠️</span> 오류
+          </h2>
+          <p className="text-slate-300 mb-6">{error}</p>
           <button
             onClick={onClose}
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+            className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-3 px-4 rounded-lg font-semibold transition transform hover:scale-105"
           >
             닫기
           </button>
@@ -124,28 +126,29 @@ export default function MapModal({ address, onClose }: MapModalProps) {
 
   if (loading || !coordinates) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
-          <p className="text-center text-gray-700">지도를 불러오는 중...</p>
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl border border-white/10 p-8 max-w-sm w-full shadow-2xl text-center">
+          <div className="text-4xl mb-4">🗺️</div>
+          <p className="text-slate-300 font-semibold">지도를 불러오는 중...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg overflow-hidden max-w-2xl w-full h-[600px] flex flex-col">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl overflow-hidden max-w-3xl w-full h-[700px] flex flex-col border border-white/10 shadow-2xl">
         {/* 헤더 */}
-        <div className="bg-blue-600 text-white p-4 flex justify-between items-start">
+        <div className="bg-gradient-to-r from-blue-600/20 to-cyan-600/20 border-b border-white/10 text-white p-6 flex justify-between items-start">
           <div>
-            <h2 className="text-xl font-bold">{address}</h2>
-            <p className="text-sm mt-1">
+            <h2 className="text-2xl font-bold text-white mb-2">{address}</h2>
+            <p className="text-sm text-slate-300">
               📍 {coordinates.lat.toFixed(4)}, {coordinates.lng.toFixed(4)}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="text-2xl font-bold hover:opacity-70"
+            className="text-2xl font-bold text-slate-400 hover:text-white transition transform hover:scale-110"
           >
             ✕
           </button>
@@ -165,8 +168,8 @@ export default function MapModal({ address, onClose }: MapModalProps) {
             <Marker position={[coordinates.lat, coordinates.lng]}>
               <Popup>
                 <div className="text-center">
-                  <p className="font-bold">{address}</p>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="font-bold text-slate-900">{address}</p>
+                  <p className="text-sm text-slate-600 mt-1">
                     {coordinates.lat.toFixed(4)}, {coordinates.lng.toFixed(4)}
                   </p>
                 </div>
@@ -175,20 +178,22 @@ export default function MapModal({ address, onClose }: MapModalProps) {
           </MapContainer>
         </div>
 
-        {/* 날씨 정보 */}
+        {/* 날씨 정보 + 닫기 버튼 */}
         {weather && (
-          <div className="bg-gray-50 p-4 border-t">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="text-4xl">{weather.icon}</span>
+          <div className="bg-gradient-to-r from-slate-800/50 to-slate-700/50 border-t border-white/10 p-6">
+            <div className="flex items-center justify-between gap-6">
+              <div className="flex items-center gap-4">
+                <span className="text-6xl">{weather.icon}</span>
                 <div>
-                  <p className="text-2xl font-bold">{weather.temp}°C</p>
-                  <p className="text-gray-600">{weather.description}</p>
+                  <p className="text-4xl font-bold text-transparent bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text">
+                    {weather.temp}°C
+                  </p>
+                  <p className="text-slate-300 text-lg font-semibold mt-1">{weather.description}</p>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
+                className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white px-8 py-3 rounded-xl font-semibold transition transform hover:scale-105 shadow-lg hover:shadow-blue-500/30 whitespace-nowrap"
               >
                 닫기
               </button>

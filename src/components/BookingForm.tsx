@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { sendSlackNotification } from '../lib/slack';
 
 interface BookingFormProps {
   onSuccess?: () => void;
@@ -62,6 +63,16 @@ export default function BookingForm({ onSuccess }: BookingFormProps) {
       console.error('Error inserting booking:', errorMsg);
       console.error('Full error object:', insertError);
     } else {
+      // Slack에 알림 전송 (비동기)
+      sendSlackNotification({
+        customer: formData.customer,
+        service: formData.service,
+        date: formData.date,
+        time: formData.time,
+        address: formData.address,
+        status: 'pending',
+      });
+
       setFormData({
         customer: '',
         service: '',
@@ -78,23 +89,26 @@ export default function BookingForm({ onSuccess }: BookingFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg border border-gray-300 mb-6">
-      <h2 className="text-2xl font-bold mb-4">새 예약 추가</h2>
+    <form onSubmit={handleSubmit} className="mb-6">
+      <div className="flex items-center gap-3 mb-6">
+        <span className="text-2xl">✏️</span>
+        <h2 className="text-2xl font-bold text-white">새 예약 추가</h2>
+      </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
-          {error}
+        <div className="mb-6 p-4 bg-red-500/20 border border-red-400/50 rounded-xl text-red-300 text-sm backdrop-blur-sm">
+          <span className="font-semibold">⚠️ </span>{error}
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <input
           type="text"
           name="customer"
           placeholder="고객사"
           value={formData.customer}
           onChange={handleChange}
-          className="border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-transparent transition backdrop-blur-sm"
         />
         <input
           type="text"
@@ -102,42 +116,42 @@ export default function BookingForm({ onSuccess }: BookingFormProps) {
           placeholder="서비스"
           value={formData.service}
           onChange={handleChange}
-          className="border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-transparent transition backdrop-blur-sm"
         />
         <input
           type="date"
           name="date"
           value={formData.date}
           onChange={handleChange}
-          className="border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-transparent transition backdrop-blur-sm"
         />
         <input
           type="time"
           name="time"
           value={formData.time}
           onChange={handleChange}
-          className="border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-transparent transition backdrop-blur-sm"
         />
         <input
           type="text"
           name="address"
-          placeholder="주소"
+          placeholder="주소 (한글, 영문, 숫자, 쉼표, 하이픈, 괄호만 가능)"
           value={formData.address}
           onChange={handleChange}
-          className="border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 md:col-span-2"
+          className="px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-transparent transition backdrop-blur-sm md:col-span-2"
         />
       </div>
 
       <button
         type="submit"
         disabled={!isFormValid || loading}
-        className={`w-full py-2 px-4 rounded font-semibold transition ${
+        className={`w-full py-3 px-6 rounded-xl font-semibold transition transform duration-200 ${
           isFormValid && !loading
-            ? 'bg-blue-500 text-white hover:bg-blue-600'
-            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:from-blue-600 hover:to-cyan-600 hover:shadow-lg hover:shadow-blue-500/30 hover:scale-105 cursor-pointer'
+            : 'bg-slate-700 text-slate-400 cursor-not-allowed opacity-60'
         }`}
       >
-        {loading ? '예약 중...' : '예약하기'}
+        {loading ? '⏳ 예약 중...' : '🎯 예약하기'}
       </button>
     </form>
   );

@@ -93,34 +93,57 @@ export default function LoginPage() {
   }, [isLoggedIn, navigate]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-2xl p-8 max-w-md w-full">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* 배경 애니메이션 */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl"></div>
+      </div>
+
+      <div className="relative z-10 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl p-8 max-w-md w-full">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-blue-600 mb-2">예약 관리</h1>
-          <p className="text-gray-600">관리자 로그인</p>
+          <div className="inline-block mb-4 text-5xl">📋</div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent mb-2">
+            예약 관리 허브
+          </h1>
+          <p className="text-slate-300">관리자 로그인</p>
         </div>
 
         {/* 에러 메시지 */}
         {error && (
-          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm whitespace-pre-wrap">
-            {error}
+          <div className="mb-6 p-4 bg-red-500/20 border border-red-400/50 rounded-xl text-red-300 text-sm whitespace-pre-wrap backdrop-blur-sm">
+            <span className="font-semibold">⚠️ </span>{error}
           </div>
         )}
 
         {/* Google Sign-In 버튼 */}
-        <div className="bg-gray-50 p-6 rounded-lg mb-6">
-          <p className="text-gray-700 text-center mb-4 text-sm">
-            Google 계정으로 관리자 모드에 로그인하세요.
+        <div className="bg-white/10 backdrop-blur-sm border border-white/20 p-6 rounded-xl mb-6 transition">
+          <p className="text-slate-200 text-center mb-6 text-sm font-medium">
+            Google 계정으로 로그인하세요
           </p>
           <div ref={googleButtonRef} className="flex justify-center min-h-12">
-            {isLoading && <p className="text-gray-600">로그인 중...</p>}
+            {isLoading && (
+              <p className="text-slate-300 font-semibold">
+                ⏳ 로그인 중...
+              </p>
+            )}
           </div>
         </div>
 
-        <div className="text-center text-sm text-gray-500 mt-4 px-4 py-3 bg-blue-50 rounded">
-          <p className="font-semibold mb-1">⚠️ 관리자만 접근 가능</p>
-          <p>Supabase admin_users 테이블에 등록된 관리자만 로그인 가능합니다.</p>
+        {/* 정보 박스 */}
+        <div className="bg-blue-500/20 border border-blue-400/50 rounded-xl px-4 py-4 backdrop-blur-sm">
+          <p className="text-blue-300 font-semibold text-sm mb-2 flex items-center gap-2">
+            <span>🔐</span> 관리자만 접근 가능
+          </p>
+          <p className="text-blue-200/80 text-xs leading-relaxed">
+            Supabase admin_users 테이블에 등록된 관리자만 로그인할 수 있습니다.
+          </p>
         </div>
+
+        {/* 하단 텍스트 */}
+        <p className="text-center text-xs text-slate-400 mt-6">
+          © 2026 Booking Hub. All rights reserved.
+        </p>
       </div>
     </div>
   );
