@@ -9,12 +9,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const { summary, description, location, start, end } = req.body;
 
+    console.log('Adding event to Google Calendar:', { summary, description, location, start, end });
+
     // 환경 변수에서 Google OAuth 토큰 가져오기
     const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
+    console.log('Environment check:', {
+      refreshToken: refreshToken ? '✓' : '✗',
+      clientId: clientId ? '✓' : '✗',
+      clientSecret: clientSecret ? '✓' : '✗',
+    });
+
     if (!refreshToken || !clientId || !clientSecret) {
+      console.error('Missing credentials:', { refreshToken, clientId, clientSecret });
       return res.status(400).json({ error: 'Missing Google credentials' });
     }
 
@@ -41,11 +50,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       end,
     };
 
+    console.log('Calling Google Calendar API...');
     const response = await calendar.events.insert({
       calendarId: 'primary',
       requestBody: event,
     });
 
+    console.log('Event created successfully:', response.data.id);
     return res.status(200).json({
       success: true,
       eventId: response.data.id,
@@ -53,9 +64,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   } catch (error) {
     console.error('Error adding event to Google Calendar:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('Error details:', errorMessage);
     return res.status(500).json({
       error: 'Failed to add event to Google Calendar',
-      details: error instanceof Error ? error.message : String(error),
+      details: errorMessage,
     });
   }
 }
