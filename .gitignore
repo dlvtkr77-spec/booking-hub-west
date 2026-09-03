@@ -26,3 +26,5 @@ build/
 .cache/
 .parcel-cache/
 .eslintcache
+.vercel
+.env*
