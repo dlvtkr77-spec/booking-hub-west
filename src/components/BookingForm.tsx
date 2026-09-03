@@ -64,7 +64,10 @@ export default function BookingForm({ onSuccess }: BookingFormProps) {
       console.error('Error inserting booking:', errorMsg);
       console.error('Full error object:', insertError);
     } else {
+      console.log('✅ Booking added successfully, sending notifications...');
+
       // Slack에 알림 전송 (비동기)
+      console.log('📨 Sending Slack notification...');
       sendSlackNotification({
         customer: formData.customer,
         service: formData.service,
@@ -75,6 +78,7 @@ export default function BookingForm({ onSuccess }: BookingFormProps) {
       });
 
       // Google Calendar에 이벤트 추가 (비동기)
+      console.log('📅 Adding event to Google Calendar...');
       addEventToGoogleCalendar({
         customer: formData.customer,
         service: formData.service,
@@ -82,6 +86,7 @@ export default function BookingForm({ onSuccess }: BookingFormProps) {
         time: formData.time,
         address: formData.address,
       });
+      console.log('✓ Google Calendar function called');
 
       setFormData({
         customer: '',
