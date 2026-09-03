@@ -37,6 +37,8 @@ export async function addEventToGoogleCalendar(booking: {
     };
 
     // 서버에 요청을 보내 Google Calendar에 이벤트 추가
+    console.log('Sending event to Google Calendar API:', event);
+
     const response = await fetch('/api/calendar/add-event', {
       method: 'POST',
       headers: {
@@ -45,15 +47,22 @@ export async function addEventToGoogleCalendar(booking: {
       body: JSON.stringify(event),
     });
 
+    const responseData = await response.json();
+    console.log('Google Calendar API response:', responseData);
+
     if (!response.ok) {
-      console.error('Failed to add event to Google Calendar:', response.statusText);
+      console.error('Failed to add event to Google Calendar:', response.status, responseData);
       return false;
     }
 
-    console.log('Event added to Google Calendar successfully');
+    console.log('Event added to Google Calendar successfully:', responseData);
     return true;
   } catch (error) {
-    console.error('Error adding event to Google Calendar:', error);
+    console.error('Error in addEventToGoogleCalendar:', error);
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+    }
     return false;
   }
 }
