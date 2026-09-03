@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { sendSlackNotification } from '../lib/slack';
+import { addEventToGoogleCalendar } from '../lib/googleCalendar';
 
 interface BookingFormProps {
   onSuccess?: () => void;
@@ -71,6 +72,15 @@ export default function BookingForm({ onSuccess }: BookingFormProps) {
         time: formData.time,
         address: formData.address,
         status: 'pending',
+      });
+
+      // Google Calendar에 이벤트 추가 (비동기)
+      addEventToGoogleCalendar({
+        customer: formData.customer,
+        service: formData.service,
+        date: formData.date,
+        time: formData.time,
+        address: formData.address,
       });
 
       setFormData({
