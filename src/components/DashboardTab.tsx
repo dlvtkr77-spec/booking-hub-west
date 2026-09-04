@@ -134,8 +134,11 @@ export default function DashboardTab() {
         }
 
         setRefreshLog((prev) => prev + 1);
-        setRefreshBoard((prev) => prev + 1);
       }
+
+      // 모든 처리 완료 후 StatusBoard 새로고침
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setRefreshBoard((prev) => prev + 1);
 
       alert(`${pendingBookings.length}건의 예약을 판정했습니다`);
     } catch (error) {

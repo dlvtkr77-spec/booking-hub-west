@@ -85,7 +85,8 @@ export default function StatusBoard({ refreshKey }: StatusBoardProps) {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'bookings' },
-        () => {
+        (payload) => {
+          console.log('📡 Realtime update received:', payload);
           fetchBookings();
         }
       )
