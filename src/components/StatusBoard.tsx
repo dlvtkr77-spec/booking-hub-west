@@ -8,7 +8,7 @@ interface Booking {
   kind: string;
   form: string;
   memo: string;
-  location?: string;
+  address?: string;
   slot_assigned?: string;
   reason?: string;
   options?: string;
@@ -160,7 +160,7 @@ export default function StatusBoard({ refreshKey }: StatusBoardProps) {
                     const isConfirmedExternal =
                       (booking.decision === 'confirmed_auto' || booking.decision === 'confirmed_human') &&
                       booking.form === '외근';
-                    const hasLocation = booking.location && booking.location.trim() !== '';
+                    const hasAddress = booking.address && booking.address.trim() !== '';
 
                     return (
                       <div
@@ -173,7 +173,7 @@ export default function StatusBoard({ refreshKey }: StatusBoardProps) {
                         </p>
                         <p className="text-slate-300">{booking.memo}</p>
 
-                        {isConfirmedExternal && hasLocation && (
+                        {isConfirmedExternal && hasAddress && (
                           <div className="bg-slate-800/50 rounded p-1.5 space-y-1 mt-2">
                             {booking.travel_time && (
                               <p className="text-cyan-300 font-semibold">

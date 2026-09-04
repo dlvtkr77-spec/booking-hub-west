@@ -115,24 +115,39 @@ async function fetchWeather(coords: Coordinates): Promise<WeatherInfo | null> {
 export async function getTravelAndWeather(
   address: string
 ): Promise<{ distance?: number; duration?: number; weather?: string } | null> {
-  const coords = await fetchCoordinates(address);
-  if (!coords) return null;
+  try {
+    console.log(`🔍 getTravelAndWeather 시작: ${address}`);
 
-  const [travelInfo, weatherInfo] = await Promise.all([
-    calculateTravelTime(coords),
-    fetchWeather(coords),
-  ]);
+    const coords = await fetchCoordinates(address);
+    if (!coords) {
+      console.warn('좌표 조회 실패');
+      return null;
+    }
+    console.log(`✅ 좌표 조회 성공:`, coords);
 
-  const result: { distance?: number; duration?: number; weather?: string } = {};
+    const [travelInfo, weatherInfo] = await Promise.all([
+      calculateTravelTime(coords),
+      fetchWeather(coords),
+    ]);
 
-  if (travelInfo) {
-    result.distance = travelInfo.distance;
-    result.duration = travelInfo.duration;
+    console.log(`🚗 이동 시간:`, travelInfo);
+    console.log(`🌤️ 날씨:`, weatherInfo);
+
+    const result: { distance?: number; duration?: number; weather?: string } = {};
+
+    if (travelInfo) {
+      result.distance = travelInfo.distance;
+      result.duration = travelInfo.duration;
+    }
+
+    if (weatherInfo) {
+      result.weather = `${weatherInfo.icon} ${weatherInfo.temp}°C ${weatherInfo.description}`;
+    }
+
+    console.log(`📊 최종 결과:`, result);
+    return Object.keys(result).length > 0 ? result : null;
+  } catch (err) {
+    console.error('getTravelAndWeather 에러:', err);
+    return null;
   }
-
-  if (weatherInfo) {
-    result.weather = `${weatherInfo.icon} ${weatherInfo.temp}°C ${weatherInfo.description}`;
-  }
-
-  return Object.keys(result).length > 0 ? result : null;
 }

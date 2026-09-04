@@ -118,7 +118,16 @@ export default function DashboardTab() {
 
               if (Object.keys(travelUpdate).length > 0) {
                 console.log(`Updating travel info for booking ${booking.id}:`, travelUpdate);
-                await supabase.from('bookings').update(travelUpdate).eq('id', booking.id);
+                const { error: travelError } = await supabase
+                  .from('bookings')
+                  .update(travelUpdate)
+                  .eq('id', booking.id);
+
+                if (travelError) {
+                  console.error('Travel info update failed:', travelError);
+                } else {
+                  console.log('✅ Travel info updated successfully');
+                }
               }
             }
           }
