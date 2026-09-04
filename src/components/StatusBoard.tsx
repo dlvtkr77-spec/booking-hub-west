@@ -8,10 +8,14 @@ interface Booking {
   kind: string;
   form: string;
   memo: string;
+  location?: string;
   slot_assigned?: string;
   reason?: string;
   options?: string;
   decision: string;
+  travel_time?: number;
+  travel_distance?: number;
+  weather?: string;
 }
 
 interface StatusBoardProps {
@@ -152,32 +156,52 @@ export default function StatusBoard({ refreshKey }: StatusBoardProps) {
                 {bookings.length === 0 ? (
                   <div className="text-center text-slate-500 py-8 text-xs">비어있음</div>
                 ) : (
-                  bookings.map((booking) => (
-                    <div
-                      key={booking.id}
-                      className="bg-slate-900/50 border border-slate-700 rounded p-2 text-xs space-y-1"
-                    >
-                      <p className="font-semibold text-white truncate">{booking.customer}</p>
-                      <p className="text-slate-400">
-                        {booking.date} {booking.kind} {booking.form}
-                      </p>
-                      <p className="text-slate-300">{booking.memo}</p>
+                  bookings.map((booking) => {
+                    const isConfirmedExternal =
+                      (booking.decision === 'confirmed_auto' || booking.decision === 'confirmed_human') &&
+                      booking.form === '외근';
+                    const hasLocation = booking.location && booking.location.trim() !== '';
 
-                      {booking.slot_assigned && (
-                        <p className="text-emerald-300 font-semibold">{booking.slot_assigned}</p>
-                      )}
-
-                      {booking.reason && !booking.slot_assigned && (
-                        <p className="text-slate-400 line-clamp-2">{booking.reason}</p>
-                      )}
-
-                      {booking.options && (
-                        <p className="text-slate-400 text-xs">
-                          <span className="font-semibold">옵션:</span> {booking.options}
+                    return (
+                      <div
+                        key={booking.id}
+                        className="bg-slate-900/50 border border-slate-700 rounded p-2 text-xs space-y-1"
+                      >
+                        <p className="font-semibold text-white truncate">{booking.customer}</p>
+                        <p className="text-slate-400">
+                          {booking.date} {booking.kind} {booking.form}
                         </p>
-                      )}
-                    </div>
-                  ))
+                        <p className="text-slate-300">{booking.memo}</p>
+
+                        {isConfirmedExternal && hasLocation && (
+                          <div className="bg-slate-800/50 rounded p-1.5 space-y-1 mt-2">
+                            {booking.travel_time && (
+                              <p className="text-cyan-300 font-semibold">
+                                🚗 {booking.travel_distance}km · {booking.travel_time}분
+                              </p>
+                            )}
+                            {booking.weather && (
+                              <p className="text-blue-300">🌡️ {booking.weather}</p>
+                            )}
+                          </div>
+                        )}
+
+                        {booking.slot_assigned && (
+                          <p className="text-emerald-300 font-semibold">{booking.slot_assigned}</p>
+                        )}
+
+                        {booking.reason && !booking.slot_assigned && (
+                          <p className="text-slate-400 line-clamp-2">{booking.reason}</p>
+                        )}
+
+                        {booking.options && (
+                          <p className="text-slate-400 text-xs">
+                            <span className="font-semibold">옵션:</span> {booking.options}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })
                 )}
               </div>
             </div>

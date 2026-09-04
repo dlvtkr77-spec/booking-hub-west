@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { decide } from '../lib/decide';
 import { addEventToGoogleCalendar } from '../lib/googleCalendar';
 import { slotToTime } from '../lib/slotToTime';
+import { getTravelAndWeather } from '../lib/travelWeather';
 import WorkflowGraph from './WorkflowGraph';
 import JudgmentLog from './JudgmentLog';
 import StatusBoard from './StatusBoard';
@@ -18,6 +19,7 @@ interface Booking {
   trace?: string;
   memo?: string;
   address?: string;
+  form?: string;
 }
 
 export default function DashboardTab() {
@@ -84,7 +86,7 @@ export default function DashboardTab() {
           timestamp: Date.now(),
         });
 
-        // confirmed 상태면 Google Calendar에 추가
+        // confirmed 상태면 Google Calendar에 추가 및 이동 시간/날씨 계산
         if (result.decision === 'confirmed_auto' || result.decision === 'confirmed_human') {
           const slotStr = result.slotAssigned?.[0] || '오전';
           const time = slotToTime(slotStr);
@@ -97,6 +99,29 @@ export default function DashboardTab() {
             time: time,
             address: booking.address || '',
           });
+
+          // 외근이고 주소가 있으면 이동 시간과 날씨 계산
+          if (booking.form === '외근' && booking.address && booking.address.trim() !== '') {
+            console.log(`Calculating travel time and weather for ${booking.address}`);
+            const travelWeather = await getTravelAndWeather(booking.address);
+            if (travelWeather) {
+              const travelUpdate: Record<string, any> = {};
+              if (travelWeather.distance !== undefined) {
+                travelUpdate.travel_distance = travelWeather.distance;
+              }
+              if (travelWeather.duration !== undefined) {
+                travelUpdate.travel_time = travelWeather.duration;
+              }
+              if (travelWeather.weather !== undefined) {
+                travelUpdate.weather = travelWeather.weather;
+              }
+
+              if (Object.keys(travelUpdate).length > 0) {
+                console.log(`Updating travel info for booking ${booking.id}:`, travelUpdate);
+                await supabase.from('bookings').update(travelUpdate).eq('id', booking.id);
+              }
+            }
+          }
         }
 
         setRefreshLog((prev) => prev + 1);
