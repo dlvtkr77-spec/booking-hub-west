@@ -1,11 +1,22 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { decide } from '../lib/decide';
+import BookingFilter from './BookingFilter';
+
+interface FilterState {
+  dateFrom: string;
+  dateTo: string;
+  customer: string;
+  statuses: string[];
+  kinds: string[];
+  forms: string[];
+}
 
 interface Booking {
   id: number;
   customer: string;
   kind: string;
+  form?: string;
   date: string;
   slots_wanted?: string;
   decision?: string;
@@ -31,9 +42,18 @@ const DECISION_COLORS: Record<string, { bg: string; text: string; icon: string }
 
 export default function PendingManagement({ refreshKey }: PendingManagementProps) {
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [confirmingId, setConfirmingId] = useState<number | null>(null);
+  const [filters, setFilters] = useState<FilterState>({
+    dateFrom: '',
+    dateTo: '',
+    customer: '',
+    statuses: [],
+    kinds: [],
+    forms: [],
+  });
 
   useEffect(() => {
     fetchAndDecide();
@@ -73,6 +93,47 @@ export default function PendingManagement({ refreshKey }: PendingManagementProps
     } finally {
       setLoading(false);
     }
+  };
+
+  // 필터 적용
+  useEffect(() => {
+    let result = bookings;
+
+    // 날짜 범위 필터
+    if (filters.dateFrom) {
+      result = result.filter((b) => b.date >= filters.dateFrom);
+    }
+    if (filters.dateTo) {
+      result = result.filter((b) => b.date <= filters.dateTo);
+    }
+
+    // 고객사 필터
+    if (filters.customer) {
+      result = result.filter((b) =>
+        b.customer.toLowerCase().includes(filters.customer.toLowerCase())
+      );
+    }
+
+    // 상태 필터 (미확정 상태만)
+    if (filters.statuses.length > 0) {
+      result = result.filter((b) => filters.statuses.includes(b.decision || ''));
+    }
+
+    // 종류 필터
+    if (filters.kinds.length > 0) {
+      result = result.filter((b) => filters.kinds.includes(b.kind || ''));
+    }
+
+    // 형태 필터
+    if (filters.forms.length > 0) {
+      result = result.filter((b) => filters.forms.includes(b.form || ''));
+    }
+
+    setFilteredBookings(result);
+  }, [bookings, filters]);
+
+  const handleFilterChange = (newFilters: FilterState) => {
+    setFilters(newFilters);
   };
 
   const handleConfirmHuman = async (bookingId: number, slotAssigned?: string) => {
@@ -156,8 +217,18 @@ export default function PendingManagement({ refreshKey }: PendingManagementProps
         </h3>
       </div>
 
+      <BookingFilter onFilterChange={handleFilterChange} />
+
+      {filteredBookings.length === 0 ? (
+        <div className="text-center text-slate-400 py-8">🔍 필터 조건에 맞는 예약이 없습니다</div>
+      ) : (
+        <div className="mb-2 text-sm text-slate-400">
+          전체 {bookings.length}건 중 {filteredBookings.length}건 표시
+        </div>
+      )}
+
       <div className="space-y-3">
-        {bookings.map((booking) => {
+        {filteredBookings.map((booking) => {
           const color = DECISION_COLORS[booking.decision || 'pending'];
           const isReview = booking.decision === 'review';
           const options = booking.options?.split(',').filter(Boolean) || [];

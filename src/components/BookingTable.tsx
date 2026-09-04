@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import MapModal from './MapModal';
+import BookingFilter from './BookingFilter';
 
 interface Booking {
   id: number;
@@ -10,6 +11,18 @@ interface Booking {
   time: string;
   address?: string;
   status: string;
+  kind?: string;
+  form?: string;
+  decision?: string;
+}
+
+interface FilterState {
+  dateFrom: string;
+  dateTo: string;
+  customer: string;
+  statuses: string[];
+  kinds: string[];
+  forms: string[];
 }
 
 interface BookingTableProps {
@@ -18,9 +31,18 @@ interface BookingTableProps {
 
 export default function BookingTable({ refreshKey }: BookingTableProps) {
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<number | null>(null);
+  const [filters, setFilters] = useState<FilterState>({
+    dateFrom: '',
+    dateTo: '',
+    customer: '',
+    statuses: [],
+    kinds: [],
+    forms: [],
+  });
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -39,6 +61,47 @@ export default function BookingTable({ refreshKey }: BookingTableProps) {
 
     fetchBookings();
   }, [refreshKey]);
+
+  // 필터 적용
+  useEffect(() => {
+    let result = bookings;
+
+    // 날짜 범위 필터
+    if (filters.dateFrom) {
+      result = result.filter((b) => b.date >= filters.dateFrom);
+    }
+    if (filters.dateTo) {
+      result = result.filter((b) => b.date <= filters.dateTo);
+    }
+
+    // 고객사 필터
+    if (filters.customer) {
+      result = result.filter((b) =>
+        b.customer.toLowerCase().includes(filters.customer.toLowerCase())
+      );
+    }
+
+    // 상태 필터
+    if (filters.statuses.length > 0) {
+      result = result.filter((b) => filters.statuses.includes(b.decision || b.status));
+    }
+
+    // 종류 필터
+    if (filters.kinds.length > 0) {
+      result = result.filter((b) => filters.kinds.includes(b.kind || ''));
+    }
+
+    // 형태 필터
+    if (filters.forms.length > 0) {
+      result = result.filter((b) => filters.forms.includes(b.form || ''));
+    }
+
+    setFilteredBookings(result);
+  }, [bookings, filters]);
+
+  const handleFilterChange = (newFilters: FilterState) => {
+    setFilters(newFilters);
+  };
 
   const openMap = (address: string) => {
     if (!address) return;
@@ -89,8 +152,18 @@ export default function BookingTable({ refreshKey }: BookingTableProps) {
         </h3>
       </div>
 
+      <BookingFilter onFilterChange={handleFilterChange} />
+
+      {filteredBookings.length === 0 ? (
+        <div className="text-center text-slate-400 py-8">🔍 필터 조건에 맞는 예약이 없습니다</div>
+      ) : (
+        <div className="mb-2 text-sm text-slate-400">
+          전체 {bookings.length}건 중 {filteredBookings.length}건 표시
+        </div>
+      )}
+
       <div className="space-y-3">
-        {bookings.map((booking) => (
+        {filteredBookings.map((booking) => (
           <div
             key={booking.id}
             className="group bg-gradient-to-r from-white/5 to-white/3 hover:from-white/10 hover:to-white/8 border border-white/10 rounded-xl p-5 transition duration-300 hover:border-white/20"

@@ -14,7 +14,7 @@ interface Booking {
 }
 
 export interface DecideResult {
-  decision: 'asking' | 'rejected' | 'review' | 'pending' | 'confirmed_auto';
+  decision: 'asking' | 'rejected' | 'review' | 'pending' | 'confirmed_auto' | 'confirmed_human';
   reason: string;
   options?: string[];
   candidate?: string[];

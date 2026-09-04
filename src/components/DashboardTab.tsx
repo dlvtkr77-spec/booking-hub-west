@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { decide } from '../lib/decide';
+import { addEventToGoogleCalendar } from '../lib/googleCalendar';
+import { slotToTime } from '../lib/slotToTime';
 import WorkflowGraph from './WorkflowGraph';
 import JudgmentLog from './JudgmentLog';
 import StatusBoard from './StatusBoard';
@@ -14,6 +16,8 @@ interface Booking {
   decision?: string;
   reason?: string;
   trace?: string;
+  memo?: string;
+  address?: string;
 }
 
 export default function DashboardTab() {
@@ -79,6 +83,21 @@ export default function DashboardTab() {
           to: result.decision,
           timestamp: Date.now(),
         });
+
+        // confirmed 상태면 Google Calendar에 추가
+        if (result.decision === 'confirmed_auto' || result.decision === 'confirmed_human') {
+          const slotStr = result.slotAssigned?.[0] || '오전';
+          const time = slotToTime(slotStr);
+
+          console.log(`Adding to Google Calendar: ${booking.customer} on ${booking.date} at ${time}`);
+          await addEventToGoogleCalendar({
+            customer: booking.customer,
+            service: booking.memo || booking.customer,
+            date: booking.date,
+            time: time,
+            address: booking.address || '',
+          });
+        }
 
         setRefreshLog((prev) => prev + 1);
         setRefreshBoard((prev) => prev + 1);
