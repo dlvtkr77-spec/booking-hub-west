@@ -1,17 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { supabase } from '../lib/supabase';
 import BookingForm from '../components/BookingForm';
 import BookingTable from '../components/BookingTable';
 import PendingManagement from '../components/PendingManagement';
 import DashboardTab from '../components/DashboardTab';
-
-interface Stats {
-  total: number;
-  confirmed: number;
-  pending: number;
-}
 
 export default function AdminDashboard() {
   const { user, logout } = useAuth();
@@ -111,7 +104,7 @@ export default function AdminDashboard() {
 
         {/* 탭 콘텐츠 */}
         <div className={activeTab === 'dashboard' ? '' : 'bg-white/5 backdrop-blur-lg rounded-2xl border border-white/10 p-8 shadow-2xl'}>
-          {activeTab === 'dashboard' && <DashboardTab refreshKey={refreshKey} />}
+          {activeTab === 'dashboard' && <DashboardTab />}
           {activeTab === 'add' && <BookingForm onSuccess={handleFormSuccess} />}
           {activeTab === 'list' && <BookingTable refreshKey={refreshKey} />}
           {activeTab === 'pending' && <PendingManagement refreshKey={refreshKey} />}
