@@ -145,7 +145,7 @@ export default function WorkflowGraph({ lastTransition }: WorkflowGraphProps) {
       {/* 워크플로 그래프 */}
       <div className="bg-white/5 border border-white/10 rounded-xl p-6">
         <h3 className="text-lg font-semibold text-white mb-4">워크플로</h3>
-        <svg width="100%" height="350" viewBox="0 0 550 300" className="bg-slate-900/30 rounded-lg">
+        <svg width="100%" height="500" viewBox="0 0 550 350" className="bg-slate-900/30 rounded-lg">
           <defs>
             <marker
               id="arrowhead"
