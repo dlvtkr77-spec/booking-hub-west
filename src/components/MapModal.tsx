@@ -18,22 +18,79 @@ interface Weather {
   icon: string;
 }
 
+interface TravelInfo {
+  distance: number;
+  duration: number;
+}
+
 export default function MapModal({ address, onClose }: MapModalProps) {
   const [coordinates, setCoordinates] = useState<Coordinates | null>(null);
   const [weather, setWeather] = useState<Weather | null>(null);
+  const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
+  const [travelInfo, setTravelInfo] = useState<TravelInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const calculateTravelTime = async (from: Coordinates, to: Coordinates) => {
+    try {
+      const response = await fetch(
+        `https://router.project-osrm.org/route/v1/driving/${from.lng},${from.lat};${to.lng},${to.lat}?overview=false`
+      );
+
+      const data = await response.json();
+
+      if (data.routes && data.routes.length > 0) {
+        const route = data.routes[0];
+        const distanceKm = (route.distance / 1000).toFixed(1);
+        const durationMin = Math.round(route.duration / 60);
+
+        setTravelInfo({
+          distance: parseFloat(distanceKm),
+          duration: durationMin,
+        });
+      }
+    } catch (err) {
+      console.warn('이동 시간 계산 실패:', err);
+    }
+  };
+
+  const getUserLocation = () => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const loc = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          setUserLocation(loc);
+          console.log('📍 현재 위치:', loc);
+        },
+        (error) => {
+          console.warn('현재 위치 탐색 실패:', error);
+        }
+      );
+    }
+  };
+
+  useEffect(() => {
+    getUserLocation();
+  }, []);
 
   useEffect(() => {
     fetchCoordinates();
   }, [address]);
+
+  useEffect(() => {
+    if (userLocation && coordinates) {
+      calculateTravelTime(userLocation, coordinates);
+    }
+  }, [userLocation, coordinates]);
 
   const fetchCoordinates = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Nominatim API로 주소 → 좌표 변환
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`,
         {
@@ -55,7 +112,6 @@ export default function MapModal({ address, onClose }: MapModalProps) {
       const coords = { lat: parseFloat(lat), lng: parseFloat(lon) };
       setCoordinates(coords);
 
-      // 날씨 정보 조회
       fetchWeather(coords);
     } catch (err) {
       setError('좌표 조회 실패: ' + (err as Error).message);
@@ -65,7 +121,6 @@ export default function MapModal({ address, onClose }: MapModalProps) {
 
   const fetchWeather = async (coords: Coordinates) => {
     try {
-      // Open-Meteo API로 날씨 조회 (무료, 라이선스 불필요)
       const response = await fetch(
         `https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lng}&current=temperature_2m,weather_code&timezone=Asia/Seoul`
       );
@@ -73,7 +128,6 @@ export default function MapModal({ address, onClose }: MapModalProps) {
       const data = await response.json();
       const current = data.current;
 
-      // WMO 날씨 코드 → 설명
       const weatherDescriptions: { [key: number]: { desc: string; icon: string } } = {
         0: { desc: '맑음', icon: '☀️' },
         1: { desc: '흐림', icon: '🌤️' },
@@ -144,6 +198,11 @@ export default function MapModal({ address, onClose }: MapModalProps) {
             <p className="text-sm text-slate-300">
               📍 {coordinates.lat.toFixed(4)}, {coordinates.lng.toFixed(4)}
             </p>
+            {userLocation && travelInfo && (
+              <p className="text-sm text-cyan-300 mt-2">
+                🚗 현재 위치에서 {travelInfo.distance}km · {travelInfo.duration}분
+              </p>
+            )}
           </div>
           <button
             onClick={onClose}
@@ -172,9 +231,26 @@ export default function MapModal({ address, onClose }: MapModalProps) {
                   <p className="text-sm text-slate-600 mt-1">
                     {coordinates.lat.toFixed(4)}, {coordinates.lng.toFixed(4)}
                   </p>
+                  {travelInfo && (
+                    <p className="text-sm text-blue-600 mt-2">
+                      🚗 {travelInfo.distance}km · {travelInfo.duration}분
+                    </p>
+                  )}
                 </div>
               </Popup>
             </Marker>
+            {userLocation && (
+              <Marker position={[userLocation.lat, userLocation.lng]}>
+                <Popup>
+                  <div className="text-center">
+                    <p className="font-bold text-slate-900">현재 위치</p>
+                    <p className="text-sm text-slate-600 mt-1">
+                      {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
+                    </p>
+                  </div>
+                </Popup>
+              </Marker>
+            )}
           </MapContainer>
         </div>
 
